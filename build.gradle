@@ -2,24 +2,33 @@ apply plugin: 'java'
 apply plugin: 'eclipse-wtp'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'com.palantir.docker'
 
-version = '2.0.0.M1'
+//version = '1.0-SNAPSHOT'
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
+group = 'yaromudr'
+
+//jar {
+//    baseName = "chat"
+//}
 
 buildscript {
     ext {
         springBootVersion = '2.0.0.M2'
+        dockerVersion = '1.2'
     }
     repositories {
         mavenCentral()
         maven { url "http://repo.spring.io/libs-release" }
         maven { url "http://repo.spring.io/milestone" }
         maven { url "http://repo.spring.io/snapshot" }
+        maven { url "https://plugins.gradle.org/m2/" }
     }
 
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath('gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.13.0')
     }
 }
 
@@ -50,4 +59,11 @@ dependencies {
     
     testCompile("org.springframework.boot:spring-boot-starter-test")
     testCompile("org.junit.jupiter:junit-jupiter-api:${jUnit5Version}")
+}
+
+docker {
+    dockerfile = file('src/main/docker/Dockerfile')
+    name "${project.group}/chat"
+    files jar.archivePath
+    buildArgs(['JAR_FILE': "${jar.archiveName}"])
 }
